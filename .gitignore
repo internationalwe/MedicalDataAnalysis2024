@@ -1,0 +1,6 @@
+outputs
+*.png
+*.jpg
+wandb
+*.pyc
+results
