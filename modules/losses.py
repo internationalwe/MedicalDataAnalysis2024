@@ -1,5 +1,7 @@
 """Losses
     * https://github.com/JunMa11/SegLoss
+    # https://github.com/AdeelH/pytorch-multi-class-focal-loss
+   # https://github.com/gazelle93/Multiclass-Focal-loss-pytorch
 """
 
 from typing import Optional, Sequence
