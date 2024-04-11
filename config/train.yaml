@@ -6,7 +6,7 @@ verbose: False
 
 # Wandb
 project_name : "MedicalDataAnalysis2024Main"
-run_name: mobilenet_v3_large_sch10_NAdam
+run_name: mobilenet_v3_large_sch10
 wandb_note : "saklas"
 
 # Train / val
@@ -50,7 +50,7 @@ metrics:
 earlystopping_target: val_f1-score
 earlystopping_patience: 5
 optimizer:
-  name: NAdam
+  name: AdamW
   args:
     lr: 5.0e-04
     weight_decay: 5.0e-02

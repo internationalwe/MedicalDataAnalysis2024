@@ -30,6 +30,7 @@ class Recorder():
         self.plot_dir = os.path.join(record_dir, 'plots')
         self.record_filepath = os.path.join(self.record_dir, 'record.csv')
         self.weight_path = os.path.join(record_dir, 'model.pt')
+        self.model_path = os.path.join(record_dir, 'model.pth')
 
         self.logger = logger
         self.model = model
@@ -93,6 +94,7 @@ class Recorder():
             'amp': self.amp.state_dict() if self.amp else None}
 
         torch.save(check_point, self.weight_path)
+        torch.save(self.model,self.model_path)
         self.logger.debug(f"RECORDER | epoch {epoch}, checkpoint saved: {self.weight_path}")
 
     

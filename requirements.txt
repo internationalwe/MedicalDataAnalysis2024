@@ -9,3 +9,5 @@ wandb
 triton
 pickle5
 pandas
+openvino-dev
+tensorflow

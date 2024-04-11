@@ -53,7 +53,7 @@ def rotate_affine_crop_horizontal_colorjitter(config):
             transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),  # 무작위 줌인
             transforms.RandomHorizontalFlip(p = 1),  # 무작위로 수평으로 뒤집기
             
-            transforms.Resize(config["input_width"], config["input_height"]),
+            transforms.Resize((config["input_width"], config["input_height"])),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ]
@@ -67,7 +67,7 @@ def only_colorjitter(config):
                         saturation=(0.7, 0.9),
                         hue=(-0.2, 0.2),
             ),
-            transforms.Resize(config["input_width"], config["input_height"]),
+            transforms.Resize((config["input_width"], config["input_height"])),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ]
