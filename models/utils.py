@@ -41,8 +41,6 @@ def get_model(model_str: str):
         return TinyNet_E  
     elif model_str == 'tiny_vit':
         return tiny_vit_21m_224_dist_in22k_ft_in1k
-    elif model_str == 'cross_stitch':
-        return CrossStitchNetwork    
     elif model_str == 'tf_efficientnet_b5.ns_jft_in1k':
         return tf_efficientnet_b5_ns
     elif model_str == 'tf_efficientnetv2_m.in21k_ft_in1k':
@@ -77,6 +75,18 @@ def get_model(model_str: str):
         return caformer_b36_sail_in22k_ft_in1k_froze01
     elif model_str == 'convformer_m36_sail_in22k_ft_in1k_freeze':
         return convformer_m36_sail_in22k_ft_in1k_freeze
+    elif model_str == "deit3_small_patch16_384.fb_in22k_ft_in1k":
+        return deit3_small_patch16_384_fb_in22k_ft_in1k
+    elif model_str == "caformer_s36.sail_in22k_ft_in1k_384":
+        return caformer_s36_sail_in22k_ft_in1k_384
+    elif model_str == "swinv2_base_window12to16_192to256.ms_in22k_ft_in1k":
+        return swinv2_base_window12to16_192to256_ms_in22k_ft_in1k
+    elif model_str =="maxvit_nano_rw_256.sw_in1k":
+        return maxvit_nano_rw_256_sw_in1k
+    elif model_str == "deit3_small_patch16_224.fb_in22k_ft_in1k":
+        return deit3_small_patch16_224_fb_in22k_ft_in1k
+    elif model_str == "convnext_tiny.in12k_ft_in1k":
+        return convnext_tiny_in12k_ft_in1k
     # elif model_str == 'xcit_small_12_p8_224.fb_dist_in1k':
     #     return timm.create_model(model_str,pretrained=True)
     
@@ -371,7 +381,7 @@ class caformer_b36_sail_in22k_ft_in1k(nn.Module):
     def __init__(self, num_classes):
         super(caformer_b36_sail_in22k_ft_in1k, self).__init__()
         
-        self.model = timm.create_model("caformer_b36.sail_in22k_ft_in1k", pretrained=True)
+        self.model = timm.create_model("caformer_b36.sail_in22k_ft_in1k", pretrained=True,drop_rate=0.2)
         pre_layer = self.model.head.fc.fc2.in_features
         self.model.head.fc.fc2 = nn.Linear(pre_layer, num_classes)
         
@@ -391,6 +401,20 @@ class caformer_s36_sail_in22k_ft_in1k(nn.Module):
     def forward(self, x):
         x = self.model(x)
         return x
+class caformer_s36_sail_in22k_ft_in1k_384(nn.Module):
+    def __init__(self, num_classes):
+        super(caformer_s36_sail_in22k_ft_in1k_384, self).__init__()
+        
+        self.model = timm.create_model("caformer_s36.sail_in22k_ft_in1k_384", pretrained=False,num_classes=num_classes)
+        # pre_layer = self.model.head.fc.fc2.in_features
+        # # self.model.head.fc.fc2 = nn.Linear(pre_layer, num_classes)
+        # self.model.head.fc.fc2 = Identity()
+        # self.linear =  nn.Linear(pre_layer, num_classes)
+        
+    def forward(self, x):
+        x = self.model(x)
+        # x = self.linear(x)
+        return x
     
 class convformer_m36_sail_in22k_ft_in1k(nn.Module):
     def __init__(self, num_classes):
@@ -404,6 +428,18 @@ class convformer_m36_sail_in22k_ft_in1k(nn.Module):
         x = self.model(x)
         return x
     
+    
+class deit3_small_patch16_384_fb_in22k_ft_in1k(nn.Module):
+    def __init__(self, num_classes):
+        super(deit3_small_patch16_384_fb_in22k_ft_in1k, self).__init__()
+        
+        self.model = timm.create_model("deit3_small_patch16_384.fb_in22k_ft_in1k", pretrained=True)
+        pre_layer = self.model.head.in_features
+        self.model.head = nn.Linear(pre_layer, num_classes)
+        
+    def forward(self, x):
+        x = self.model(x)
+        return x
     
 class convnext_small_in12k_ft_in1k(nn.Module):
     def __init__(self, num_classes):
@@ -524,49 +560,15 @@ class TinyVit(nn.Module):
         x = self.model(x)
 
         return x
-    
-
-    
-class CrossStitchUnit(nn.Module):
-    def __init__(self):
-        super(CrossStitchUnit, self).__init__()
-        self.alpha = nn.Parameter(torch.randn(3, 3))
-
-    def forward(self, x1, x2, x3):
-        x1_out = self.alpha[0, 0]*x1 + self.alpha[0, 1]*x2 + self.alpha[0, 2]*x3
-        x2_out = self.alpha[1, 0]*x1 + self.alpha[1, 1]*x2 + self.alpha[1, 2]*x3
-        x3_out = self.alpha[2, 0]*x1 + self.alpha[2, 1]*x2 + self.alpha[2, 2]*x3
-        return x1_out, x2_out, x3_out  
-
-class CrossStitchNetwork(nn.Module):
-    def __init__(self):
-        super(CrossStitchNetwork, self).__init__()
-
-        self.model_1 = timm.create_model("tiny_vit_21m_224.dist_in22k_ft_in1k", pretrained=True)
-        pre_layer = self.model_1.head.fc.in_features
-        self.model_1.head.fc = Identity()
-        self.model_2 = timm.create_model("tiny_vit_21m_224.dist_in22k_ft_in1k", pretrained=True)
-        self.model_2.head.fc = Identity()
-        self.model_3 = timm.create_model("tiny_vit_21m_224.dist_in22k_ft_in1k", pretrained=True)
-        self.model_3.head.fc = Identity()
-
-        self.cross_stitch = CrossStitchUnit()
-
-        self.fc1 = nn.Linear(pre_layer, 3)
-        self.fc2 = nn.Linear(pre_layer, 2)
-        self.fc3 = nn.Linear(pre_layer, 3)
+class swinv2_base_window12to16_192to256_ms_in22k_ft_in1k(nn.Module):
+    def __init__(self, num_classes):
+        super(swinv2_base_window12to16_192to256_ms_in22k_ft_in1k, self).__init__()
+        self.model = timm.create_model("swinv2_base_window12to16_192to256.ms_in22k_ft_in1k", pretrained=True,num_classes = num_classes)
 
     def forward(self, x):
-        x1 = self.model_1(x)
-        x2 = self.model_2(x)
-        x3 = self.model_3(x)
-        x1, x2, x3 = self.cross_stitch(x1, x2, x3)
-        x1 = self.fc1(x1)
-        x2 = self.fc2(x2)
-        x3 = self.fc3(x3)
-        x_list = [x1, x2, x3]
-        return x_list
-    
+        x = self.model(x)
+        return x
+
 class tiny_vit_21m_224_dist_in22k_ft_in1k_froze(nn.Module):
     def __init__(self, num_classes):
         super(tiny_vit_21m_224_dist_in22k_ft_in1k_froze, self).__init__()
@@ -645,6 +647,30 @@ class convformer_m36_sail_in22k_ft_in1k_freeze(nn.Module):
         for param in self.model.head.parameters():
             param.requires_grad = True
         
+    def forward(self, x):
+        x = self.model(x)
+        return x
+class maxvit_nano_rw_256_sw_in1k(nn.Module):
+    def __init__(self, num_classes):
+        super(maxvit_nano_rw_256_sw_in1k, self).__init__()
+        self.model = timm.create_model("maxvit_nano_rw_256.sw_in1k", pretrained=True,num_classes = num_classes)
+
+    def forward(self, x):
+        x = self.model(x)
+        return x
+class deit3_small_patch16_224_fb_in22k_ft_in1k(nn.Module):
+    def __init__(self, num_classes):
+        super(deit3_small_patch16_224_fb_in22k_ft_in1k, self).__init__()
+        self.model = timm.create_model("deit3_small_patch16_224.fb_in22k_ft_in1k", pretrained=True,num_classes = num_classes)
+
+    def forward(self, x):
+        x = self.model(x)
+        return x
+class convnext_tiny_in12k_ft_in1k(nn.Module):
+    def __init__(self, num_classes):
+        super(convnext_tiny_in12k_ft_in1k, self).__init__()
+        self.model = timm.create_model("convnext_tiny.in12k_ft_in1k", pretrained=True,num_classes = num_classes)
+
     def forward(self, x):
         x = self.model(x)
         return x

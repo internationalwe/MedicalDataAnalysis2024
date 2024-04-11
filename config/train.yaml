@@ -5,11 +5,10 @@ debug: False
 verbose: False
 
 # Wandb
-project_name : "asksalk"
-run_name : "askal"
+project_name : "MedicalDataAnalysis2024Main"
+run_name: mobilenet_v3_large_sch10_NAdam
 wandb_note : "saklas"
 
-mlflow_exp_name : "xp"
 # Train / val
 val_size: 0.2
 
@@ -29,7 +28,7 @@ drop_last: False
 # Model
 
 model:
-  model_name: eifficientnet_b3
+  model_name: mobilenet_v3_large
   args:
     num_classes: 4
 
@@ -40,20 +39,25 @@ loss:
   name: MeanCCELoss # MeanCCELoss
   args:
     weight: [1, 1, 1, 1]
+# loss: 
+#   name: Focal # MeanCCELoss
+#   args:
+#     alpha: [0.25,0.25,0.25,0.25]
+#     gamma: 2
 metrics: 
   - f1-score
   - acc
 earlystopping_target: val_f1-score
 earlystopping_patience: 5
 optimizer:
-  name: AdamW
+  name: NAdam
   args:
     lr: 5.0e-04
     weight_decay: 5.0e-02
 scheduler:
   name: CosineAnnealingLR
   args:
-    T_max: 100
+    T_max: 10
     eta_min: 0
 
 # Logging

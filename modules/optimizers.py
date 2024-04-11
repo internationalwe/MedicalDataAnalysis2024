@@ -25,7 +25,10 @@ def get_optimizer(optimizer_str: str)-> 'optimizer':
     elif optimizer_str == 'madgrad':
 
         optimizer = madgrad.MADGRAD
+    elif optimizer_str == 'NAdam':
         
+        optimizer = optim.NAdam
+    
     return optimizer
 
 def exists(val):
