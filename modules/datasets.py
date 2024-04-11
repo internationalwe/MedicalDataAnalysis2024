@@ -76,10 +76,10 @@ class AlbumentationsImageFolder(datasets.ImageFolder):
         image = image.convert('RGB')
         image = np.array(image)
         # albumentations 변환 적용
+        if self.scaler is not None:
+            image = self.scaler(image)
         if self.alb_transform:
             augmented = self.alb_transform(image=image)
             image = augmented['image']
-        if self.scaler is not None:
-            image = self.scaler(image)
         image = image.transpose((2, 0, 1))
         return image, target, path
