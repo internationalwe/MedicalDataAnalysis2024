@@ -1,12 +1,12 @@
 # System
-gpu_num: 0
+gpu_num: 1
 seed: 42
 debug: False
 verbose: False
 
 # Wandb
 project_name : "MedicalDataAnalysis2024Main"
-run_name: mobilenet_v3_large_sch10
+run_name: tf_efficientnet_b2.ns_jft_in1k_sh10_softmax_scaler_focalLoss_diffrentalpha_15
 wandb_note : "saklas"
 
 # Train / val
@@ -18,9 +18,9 @@ val_data_path : './dataset/val/'
 dataset_name : 'AlbumentationsImageFolder'
 input_width: 224
 input_height: 224
-scaler: normalize
+scaler: normalize #None #normalize
 transform_name: baseTransform
-num_workers: 4
+num_workers: 12
 shuffle: True
 drop_last: False
 
@@ -28,7 +28,7 @@ drop_last: False
 # Model
 
 model:
-  model_name: mobilenet_v3_large
+  model_name: tf_efficientnet_b2.ns_jft_in1k
   args:
     num_classes: 4
 
@@ -42,23 +42,23 @@ loss:
 # loss: 
 #   name: Focal # MeanCCELoss
 #   args:
-#     alpha: [0.25,0.25,0.25,0.25]
+#     alpha: [0.8,0.8,0.5,0.25]
 #     gamma: 2
 metrics: 
   - f1-score
   - acc
 earlystopping_target: val_f1-score
-earlystopping_patience: 5
+earlystopping_patience: 7
 optimizer:
   name: AdamW
   args:
-    lr: 5.0e-04
+    lr: 5.0e-03
     weight_decay: 5.0e-02
 scheduler:
   name: CosineAnnealingLR
   args:
-    T_max: 10
-    eta_min: 0
+    T_max: 15
+    eta_min: 5.0e-06
 
 # Logging
 plot:

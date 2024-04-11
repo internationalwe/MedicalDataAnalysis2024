@@ -7,6 +7,7 @@ import shutil, random, os, sys, torch
 from glob import glob
 import wandb
 from torch.utils.data import DataLoader
+import torch.nn.functional as F
 from torchvision import datasets
 from sklearn.model_selection import train_test_split
 prj_dir = os.getcwd()
@@ -74,11 +75,11 @@ train_dirs = os.path.join(prj_dir, 'data', 'train')
 # train_img_paths = glob(os.path.join(train_dirs, 'x', '*.png'))
 # train_img_paths, val_img_paths = train_test_split(train_img_paths, test_size=config['val_size'], random_state=config['seed'], shuffle=True)
 transforms = get_transform_function(config['transform_name'],config=config)
-
+val_transform = get_transform_function("baseTransform",config=config)
 train_dataset = get_dataset_function(config['dataset_name'])
 val_dataset = get_dataset_function(config['dataset_name'])
-train_dataset = train_dataset(config['train_data_path'],transform=transforms)
-val_dataset = val_dataset(config['val_data_path'],transform=transforms)
+train_dataset = train_dataset(config['train_data_path'],transform=transforms,scaler=get_image_scaler(config['scaler']))
+val_dataset = val_dataset(config['val_data_path'],transform=val_transform,scaler=get_image_scaler(config['scaler']))
 
 # train_dataset = train_dataset(paths=train_img_paths,
 #                         input_size=[config['input_width'], config['input_height']],

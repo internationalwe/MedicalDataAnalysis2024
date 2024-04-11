@@ -66,10 +66,10 @@ class SegDataset(Dataset):
 
 
 class AlbumentationsImageFolder(datasets.ImageFolder):
-    def __init__(self, root: str, transform: A.Compose, **kwargs):
+    def __init__(self, root: str, transform: A.Compose, scaler, **kwargs):
         super().__init__(root, **kwargs)
         self.alb_transform = transform
-
+        self.scaler = scaler
     def __getitem__(self, index):
         path, target = self.samples[index]
         image = Image.open(path)
@@ -79,5 +79,7 @@ class AlbumentationsImageFolder(datasets.ImageFolder):
         if self.alb_transform:
             augmented = self.alb_transform(image=image)
             image = augmented['image']
+        if self.scaler is not None:
+            image = self.scaler(image)
         image = image.transpose((2, 0, 1))
         return image, target, path

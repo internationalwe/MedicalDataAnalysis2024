@@ -57,6 +57,10 @@ def get_model(model_str: str):
         return convnext_small_in12k_ft_in1k
     elif model_str == 'tf_efficientnet_b2.ns_jft_in1k':
         return tf_efficientnet_b2_ns_jft_in1k
+    elif model_str == 'tf_efficientnet_b2.ns_jft_in1k_froze':
+        return tf_efficientnet_b2_ns_jft_in1k_froze
+    elif model_str == 'tf_efficientnet_b3.ns_jft_in1k':
+        return tf_efficientnet_b3_ns_jft_in1k
     elif model_str == 'efficientformerv2_l.snap_dist_in1k':
         return efficientformerv2_l_snap_dist_in1k
     elif model_str == 'efficientvit_b3.r224_in1k':
@@ -370,11 +374,56 @@ class tf_efficientnet_b2_ns_jft_in1k(nn.Module):
         
         self.model = timm.create_model("tf_efficientnet_b2.ns_jft_in1k", pretrained=True)
         pre_layer = self.model.classifier.in_features
-        self.model.classifier = nn.Linear(pre_layer, num_classes)
+        self.model.classifier = nn.Sequential(nn.Linear(pre_layer, num_classes),
+                                              nn.Softmax())
+        # self.model.classifier = nn.Linear(pre_layer, num_classes)
 
         
     def forward(self, x):
         x = self.model(x)
+        # x = F.softmax(x, dim=1)
+        return x
+   
+class tf_efficientnet_b2_ns_jft_in1k_froze(nn.Module):
+    def __init__(self, num_classes):
+        super(tf_efficientnet_b2_ns_jft_in1k_froze, self).__init__()
+        
+        self.model = timm.create_model("tf_efficientnet_b2.ns_jft_in1k", pretrained=True)
+        pre_layer = self.model.classifier.in_features
+        self.model.classifier = nn.Sequential(nn.Linear(pre_layer, num_classes),
+                                              nn.Softmax())
+        for param in self.model.parameters():
+            param.requires_grad = False
+        for param in self.model.blocks[4].parameters():
+            param.requires_grad = True
+        for param in self.model.blocks[5].parameters():
+            param.requires_grad = True
+        for param in self.model.blocks[6].parameters():
+            param.requires_grad = True
+        
+        self.model.conv_head.requires_grad = True
+        self.model.global_pool.require_grad = True
+        self.model.bn2.require_grad = True
+        self.model.classifier.requires_grad = True
+        
+    def forward(self, x):
+        x = self.model(x)
+        # x = F.softmax(x, dim=1)
+        return x    
+class tf_efficientnet_b3_ns_jft_in1k(nn.Module):
+    def __init__(self, num_classes):
+        super(tf_efficientnet_b3_ns_jft_in1k, self).__init__()
+        
+        self.model = timm.create_model("tf_efficientnet_b3.ns_jft_in1k", pretrained=True)
+        pre_layer = self.model.classifier.in_features
+        self.model.classifier = nn.Sequential(nn.Linear(pre_layer, num_classes),
+                                              nn.Softmax())
+        # self.model.classifier = nn.Linear(pre_layer, num_classes)
+
+        
+    def forward(self, x):
+        x = self.model(x)
+        # x = F.softmax(x, dim=1)
         return x
     
 class caformer_b36_sail_in22k_ft_in1k(nn.Module):
@@ -387,6 +436,7 @@ class caformer_b36_sail_in22k_ft_in1k(nn.Module):
         
     def forward(self, x):
         x = self.model(x)
+        x = F.softmax(x, dim=1)
         return x
 
     
@@ -463,6 +513,7 @@ class tiny_vit_21m_224_dist_in22k_ft_in1k(nn.Module):
         
     def forward(self, x):
         x = self.model(x)
+        x = F.softmax(x, dim=1)
         return x
     
 class tiny_vit_11m_224_dist_in22k_ft_in1k(nn.Module):
@@ -587,6 +638,7 @@ class tiny_vit_21m_224_dist_in22k_ft_in1k_froze(nn.Module):
         
     def forward(self, x):
         x = self.model(x)
+        x = F.softmax(x, dim=1)
         return x
 class tiny_vit_21m_224_dist_in22k_ft_in1k_froze012(nn.Module):
     def __init__(self, num_classes):
